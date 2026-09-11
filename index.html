@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Why don't you just Google this?</title>
+<meta name="description" content="Why don't you just Google this?">
+<style>
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;font-family:Arial,Helvetica,sans-serif;color:#161616}
+body{background:#f6f6f4;display:grid;place-items:center;overflow-x:hidden}
+.page{width:min(720px,calc(100% - 36px));text-align:center;padding:30px 0}
+h1{font-size:clamp(38px,7vw,68px);line-height:.98;letter-spacing:-.055em;margin:0 0 34px;font-weight:800}
+.sub{color:#777;font-size:15px;margin:-20px 0 25px}
+.form{display:flex;gap:10px}
+input{flex:1;height:58px;border:1px solid #d3d3cf;border-radius:11px;background:white;padding:0 18px;font-size:17px;outline:0;box-shadow:0 2px 8px #00000009}
+input:focus{border-color:#888;box-shadow:0 0 0 4px #0000000b}
+button{height:58px;border:0;border-radius:11px;background:#161616;color:white;padding:0 24px;font-size:16px;font-weight:700;cursor:pointer}
+button:hover{transform:translateY(-1px);box-shadow:0 5px 15px #0002}
+.result{display:none;margin:20px auto 0;background:#fff;border:1px solid #ddd;border-radius:12px;padding:20px;text-align:left}
+.result.show{display:block}
+.label{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:#888;margin-bottom:8px}
+.url{font:14px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;word-break:break-all;margin-bottom:14px}
+.copy{height:44px;font-size:14px}
+.copied{font-size:13px;color:#277333;margin-left:10px;opacity:0;transition:.2s}
+.copied.show{opacity:1}
+
+/* animation */
+.scene{display:none;position:fixed;inset:0;background:#f6f6f4;place-items:center;padding:18px}
+.scene.show{display:grid}
+.stage{width:min(850px,100%);text-align:center}
+.caption{height:62px;font-size:clamp(20px,4vw,31px);font-weight:800;letter-spacing:-.03em}
+.caption small{display:block;color:#777;font-size:13px;font-weight:400;margin-top:8px}
+.browser{background:white;border:1px solid #d4d4d4;border-radius:13px;overflow:hidden;box-shadow:0 25px 80px #0000001c;text-align:left}
+.topbar{height:42px;background:#eee;border-bottom:1px solid #ddd;display:flex;align-items:center;padding:0 13px;gap:7px}
+.dot{width:11px;height:11px;border-radius:50%;background:#c5c5c5}
+.address{height:27px;flex:1;margin-left:12px;background:#fff;border-radius:6px;color:#999;padding:6px 11px;font-size:12px}
+.google{padding:43px 35px 52px;min-height:290px}
+.logo{font-size:clamp(43px,8vw,70px);letter-spacing:-6px;font-weight:500;margin-bottom:24px}
+.logo i{font-style:normal}
+.logo i:nth-child(1){color:#4285f4}.logo i:nth-child(2){color:#ea4335}.logo i:nth-child(3){color:#fbbc05}.logo i:nth-child(4){color:#4285f4}.logo i:nth-child(5){color:#34a853}.logo i:nth-child(6){color:#ea4335}
+.search{height:55px;border:1px solid #dfe1e5;border-radius:28px;display:flex;align-items:center;padding:0 18px;box-shadow:0 1px 6px #20212422;font-size:18px}
+.mag{width:17px;height:17px;border:2px solid #777;border-radius:50%;position:relative;margin-right:15px;flex:none}
+.mag:after{content:"";position:absolute;width:7px;height:2px;background:#777;right:-5px;bottom:-3px;transform:rotate(45deg)}
+.typed{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cursor{height:22px;width:2px;background:#222;margin-left:2px;animation:blink .65s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+.spinner{display:none;margin:23px auto 0;width:26px;height:26px;border:3px solid #ddd;border-top-color:#555;border-radius:50%;animation:spin .7s linear infinite}
+.spinner.show{display:block}
+@keyframes spin{to{transform:rotate(360deg)}}
+.footer-note{font-size:13px;color:#888;margin-top:15px}
+.shake{animation:shake .16s linear 2}
+@keyframes shake{25%{transform:translateX(-3px)}75%{transform:translateX(3px)}}
+@media(max-width:560px){.form{flex-direction:column}button{width:100%}.google{padding:35px 18px 45px}.caption{height:78px}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+</style>
+</head>
+<body>
+
+<main class="page" id="landing">
+  <h1>Why don't you just Google this?</h1>
+  <div class="sub">Seriously. It takes two seconds.</div>
+  <form class="form" id="form">
+    <input id="query" type="text" placeholder="What are we Googling?" autocomplete="off" autofocus required>
+    <button>Generate Link</button>
+  </form>
+  <section class="result" id="result">
+    <div class="label">Send this to the person who needs Google</div>
+    <div class="url" id="generatedUrl"></div>
+    <button class="copy" id="copy">Copy Link</button><span class="copied" id="copied">Copied!</span>
+  </section>
+</main>
+
+<section class="scene" id="scene" aria-live="polite">
+  <div class="stage">
+    <div class="caption" id="caption">Oh, you don't know?</div>
+    <div class="browser">
+      <div class="topbar">
+        <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+        <div class="address">google.com</div>
+      </div>
+      <div class="google">
+        <div class="logo"><i>G</i><i>o</i><i>o</i><i>g</i><i>l</i><i>e</i></div>
+        <div class="search"><span class="mag"></span><span class="typed" id="typed"></span><span class="cursor"></span></div>
+        <div class="spinner" id="spinner"></div>
+      </div>
+    </div>
+    <div class="footer-note" id="note">Please remain calm while I do this incredibly difficult task.</div>
+  </div>
+</section>
+
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  const params = new URLSearchParams(location.search);
+  const incoming = (params.get("q") || "").trim();
+
+  if (incoming) {
+    $("landing").style.display = "none";
+    $("scene").classList.add("show");
+
+    const caption = $("caption"), typed = $("typed"), note = $("note"), spinner = $("spinner");
+    const lines = [
+      ["Oh, you don't know?", "No problem. I got you."],
+      ["One moment…", "This is going to be very technical."],
+      ["Almost there…", "I'm basically a search engine now."],
+      ["There you go.", "You're welcome."]
+    ];
+
+    caption.childNodes[0].textContent = lines[0][0];
+    caption.querySelector("small").textContent = lines[0][1];
+
+    const small = document.createElement("small");
+    small.textContent = lines[0][1];
+    caption.appendChild(small);
+
+    let i = 0;
+    const speed = Math.max(25, Math.min(58, 1150 / Math.max(incoming.length,1)));
+
+    setTimeout(() => {
+      const type = () => {
+        typed.textContent = incoming.slice(0,i++);
+        if (i <= incoming.length) setTimeout(type,speed);
+        else {
+          setTimeout(() => {
+            caption.childNodes[0].textContent = "There you go.";
+            small.textContent = "That wasn't so hard, was it?";
+            note.textContent = "Redirecting you to the actual search results…";
+            spinner.classList.add("show");
+            setTimeout(() => {
+              location.href = "https://www.google.com/search?q=" + encodeURIComponent(incoming);
+            }, 900);
+          }, 500);
+        }
+      };
+      type();
+    }, 900);
+  }
+
+  $("form").addEventListener("submit", e => {
+    e.preventDefault();
+    const q = $("query").value.trim();
+    if (!q) return;
+    const u = new URL(location.href);
+    u.search = "";
+    u.searchParams.set("q",q);
+    $("generatedUrl").textContent = u.href;
+    $("result").classList.add("show");
+  });
+
+  $("copy").addEventListener("click", async () => {
+    try {
+      await navigator.clipboard.writeText($("generatedUrl").textContent);
+      $("copied").classList.add("show");
+      setTimeout(()=>$("copied").classList.remove("show"),1800);
+    } catch(e) {
+      const r=document.createRange(); r.selectNodeContents($("generatedUrl"));
+      const s=getSelection(); s.removeAllRanges(); s.addRange(r);
+    }
+  });
+})();
+</script>
+</body>
+</html>
